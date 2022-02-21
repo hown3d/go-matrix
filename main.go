@@ -11,7 +11,10 @@ import (
 	"golang.org/x/term"
 )
 
-const trailSize = 10
+const (
+	trailSize  = 10
+	fadedLimit = 4
+)
 
 func main() {
 	s, err := tcell.NewScreen()
@@ -61,7 +64,7 @@ func loop(m matrix) {
 
 		switch ev := ev.(type) {
 		case *tcell.EventTime:
-			next := m.fillWithChars(startX, startY, trailSize)
+			next := m.fillWithChars(startX, startY, trailSize, fadedLimit)
 			if next {
 				startY++
 			} else {
@@ -85,6 +88,8 @@ var (
 	characters = []rune{
 		'a', 'b', 'c', 'd', 'e', 'f',
 	}
+	greenStyle = tcell.StyleDefault.Foreground(tcell.ColorGreen)
+	fadedStyle = tcell.StyleDefault.Foreground(tcell.Color30)
 )
 
 type matrix struct {
@@ -93,13 +98,15 @@ type matrix struct {
 	width  int
 }
 
-func (m matrix) fillWithChars(x, y, trail int) bool {
+func (m matrix) fillWithChars(x, y, trail, fadeLimit int) bool {
 	if y >= (m.height + trail) {
 		return false
 	}
 	// clears previous fields
 	m.screen.SetContent(x, y-trail, ' ', nil, tcell.StyleDefault)
-	m.screen.SetContent(x, y, randomChar(), nil, tcell.StyleDefault)
+	oldRune, _, _, _ := m.screen.GetContent(x, y-fadeLimit)
+	m.screen.SetContent(x, y-fadeLimit, oldRune, nil, fadedStyle)
+	m.screen.SetContent(x, y, randomChar(), nil, greenStyle)
 	return true
 }
 
