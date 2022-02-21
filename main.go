@@ -37,7 +37,7 @@ func main() {
 }
 
 func enqueueTimeEvent(s tcell.Screen) {
-	time.AfterFunc(time.Millisecond*200, func() {
+	time.AfterFunc(time.Millisecond*100, func() {
 		// requeue time event
 		err := s.PostEvent(&tcell.EventTime{})
 		if err != nil {
